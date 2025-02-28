@@ -68,7 +68,7 @@ def parse_file(text_widget):
 
 
 def extract_card_data(file_path, user_name):
-    pattern = fr'<cards player="{user_name}" type="Pocket">(.*?)</cards>'
+    pattern = fr'<cards[^>]*\bplayer="{user_name}"[^>]*>(.*?)</cards>'
 
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
