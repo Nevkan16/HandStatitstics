@@ -1,11 +1,25 @@
 import tkinter as tk
 
+def load_statistics():
+    statistics = {}
+    try:
+        with open("statistics.txt", "r") as file:
+            for line in file:
+                hand, value = line.split()
+                statistics[hand] = value
+    except FileNotFoundError:
+        print("Файл statistics.txt не найден.")
+    return statistics
 
 class Table:
-    def __init__(self, root):
+    def __init__(self, root, statistics):
         self.frame = tk.Frame(root)
         self.frame.pack(pady=10)
         self.cells = []
+        self.statistics = statistics
+
+        self.status_label = tk.Label(root, text="Наведите курсор на ячейку", width=40, height=2)
+        self.status_label.pack(pady=10)
 
         hands = ["AA", "AKs", "AQs", "AJs", "ATs", "A9s", "A8s", "A7s", "A6s", "A5s", "A4s", "A3s", "A2s",
                  "AKo", "KK", "KQs", "KJs", "KTs", "K9s", "K8s", "K7s", "K6s", "K5s", "K4s", "K3s", "K2s",
@@ -24,7 +38,16 @@ class Table:
         for i in range(13):
             row = []
             for j in range(13):
-                label = tk.Label(self.frame, text=hands[i * 13 + j], borderwidth=1, relief="solid", width=5, height=2)
+                hand = hands[i * 13 + j]
+                label = tk.Label(self.frame, text=hand, borderwidth=1, relief="solid", width=5, height=2)
                 label.grid(row=i, column=j)
                 row.append(label)
+
+                label.bind("<Enter>", lambda event, hand=hand: self.update_status(event, hand))
+
             self.cells.append(row)
+
+    def update_status(self, event, hand):
+        value = self.statistics.get(hand, "Нет данных")
+        self.status_label.config(text=f"{hand}: {value}")
+

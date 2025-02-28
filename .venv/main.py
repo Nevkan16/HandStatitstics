@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import simpledialog
-from table import Table
+from table import Table, load_statistics
 from file_operations import load_file, load_folder, parse_file
 from menu_operations import get_user_name, set_user_name
 import os
@@ -9,11 +9,12 @@ def create_window():
     root = tk.Tk()
     root.title("Окно с меню")
     root.geometry("600x625")
+    statistics = load_statistics()
 
     text_widget = tk.Text(root, height=5, state=tk.DISABLED)
     text_widget.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-    Table(root)
+    Table(root, statistics)
 
     menu_bar = tk.Menu(root)
     file_menu = tk.Menu(menu_bar, tearoff=0)
