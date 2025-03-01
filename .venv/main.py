@@ -9,12 +9,12 @@ def create_window():
     root = tk.Tk()
     root.title("Окно с меню")
     root.geometry("600x625")
-    statistics = load_statistics()
+    statistics, total_sum = load_statistics()
 
     text_widget = tk.Text(root, height=5, state=tk.DISABLED)
     text_widget.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-    table = Table(root, statistics)
+    table = Table(root, statistics, total_sum)
 
     menu_bar = tk.Menu(root)
     file_menu = tk.Menu(menu_bar, tearoff=0)

@@ -1,23 +1,34 @@
 import tkinter as tk
 
+
 def load_statistics():
     statistics = {}
+    total_sum = 0  # Переменная для хранения суммы значений
+
     try:
         with open("statistics.txt", "r") as file:
             for line in file:
                 hand, value = line.split()
+                value = int(value)  # Преобразуем в число
                 statistics[hand] = value
+                total_sum += value  # Добавляем значение в сумму
     except FileNotFoundError:
         print("Файл statistics.txt не найден.")
-    return statistics
+
+    return statistics, total_sum  # Возвращаем словарь и сумму
+
 
 class Table:
-    def __init__(self, root, statistics):
+    def __init__(self, root, statistics, total_sum):
         self.root = root
         self.frame = tk.Frame(root)
         self.frame.pack(pady=10)
         self.cells = []
         self.statistics = statistics
+        self.total_sum = total_sum  # Сохраняем сумму
+
+        self.total_label = tk.Label(root, text=f"Hands: {self.total_sum}", width=30, height=2, anchor="e")
+        self.total_label.pack(pady=5, padx=50, side="right")
 
         self.status_label = tk.Label(root, text="Наведите курсор на ячейку", width=40, height=2)
         self.status_label.pack(pady=10)
@@ -52,10 +63,21 @@ class Table:
             self.cells.append(row)
 
     def update_status(self, event, hand):
-        value = self.statistics.get(hand, "Нет данных")
-        self.status_label.config(text=f"{hand}: {value}")
+        value = self.statistics.get(hand, 0)  # Берем значение или 0, если данных нет
+        percentage = (value / self.total_sum * 100) if self.total_sum > 0 else 0  # Считаем %
+
+        if hand.endswith("s"):
+            expected_count = self.total_sum / 331.5
+        elif hand.endswith("o"):
+            expected_count = self.total_sum / 110.5
+        else:
+            expected_count = self.total_sum / 221
+
+        self.status_label.config(
+            text=f"Hand: {hand} | : {percentage:.2f}% | : {value} |  Exp: {expected_count:.1f}"
+        )
 
     def update_statistics(self):
-        self.statistics = load_statistics()
+        self.statistics, self.total_sum = load_statistics()
+        self.total_label.config(text=f"Hands: {self.total_sum}")
         self.status_label.config(text="Данные обновлены!")
-
