@@ -117,17 +117,10 @@ def parse_folder(text_widget):
     for thread in threads:
         thread.join()
 
-    save_converted_data_folder(global_card_counter)  # Записываем после завершения всех потоков
+    save_converted_data(global_card_counter)  # Записываем после завершения всех потоков
 
     elapsed_time = time.time() - start_time
     text_widget_update(text_widget, f"Обработка всех файлов завершена за {elapsed_time:.2f} секунд.\n")
-
-
-def save_converted_data_folder(card_counter):
-    if card_counter:
-        with open("statistics.txt", "a", encoding="utf-8") as stat_file:
-            for card, count in card_counter.items():
-                stat_file.write(f"{card} {count}\n")
 
 
 def extract_card_data(file_path, user_name):
@@ -139,15 +132,18 @@ def extract_card_data(file_path, user_name):
     return re.findall(pattern, content)
 
 
-def save_converted_data(matches):
-    if matches:
-        card_counter = Counter()
+def save_converted_data(data):
+    card_counter = Counter()
 
-        for match in matches:
+    if isinstance(data, list):
+        for match in data:
             converted_match = convert_card_format(match.strip())
             if converted_match:
                 card_counter[converted_match] += 1
+    elif isinstance(data, Counter):
+        card_counter = data
 
+    if card_counter:
         with open("statistics.txt", "a", encoding="utf-8") as stat_file:
             for card, count in card_counter.items():
                 stat_file.write(f"{card} {count}\n")
