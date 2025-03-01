@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import simpledialog
 from table import Table, load_statistics
-from file_operations import load_file, load_folder, parse_file
+from file_operations import load_file, load_folder, parse_file, parse_folder
 from menu_operations import get_user_name, set_user_name
 import os
 
@@ -21,6 +21,7 @@ def create_window():
     file_menu.add_command(label="Загрузить файл", command=lambda: load_file(text_widget))
     file_menu.add_command(label="Загрузить папку", command=lambda: load_folder(text_widget))
     file_menu.add_command(label="Обработать файл", command=lambda: parse_file(text_widget))
+    file_menu.add_command(label="Обработать папку", command=lambda: parse_folder(text_widget))
 
     file_menu.add_separator()
     file_menu.add_command(label="Выход", command=root.quit)
