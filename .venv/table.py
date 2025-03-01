@@ -13,6 +13,7 @@ def load_statistics():
 
 class Table:
     def __init__(self, root, statistics):
+        self.root = root
         self.frame = tk.Frame(root)
         self.frame.pack(pady=10)
         self.cells = []
@@ -21,6 +22,9 @@ class Table:
         self.status_label = tk.Label(root, text="Наведите курсор на ячейку", width=40, height=2)
         self.status_label.pack(pady=10)
 
+        self.create_table()
+
+    def create_table(self):
         hands = ["AA", "AKs", "AQs", "AJs", "ATs", "A9s", "A8s", "A7s", "A6s", "A5s", "A4s", "A3s", "A2s",
                  "AKo", "KK", "KQs", "KJs", "KTs", "K9s", "K8s", "K7s", "K6s", "K5s", "K4s", "K3s", "K2s",
                  "AQo", "KQo", "QQ", "QJs", "QTs", "Q9s", "Q8s", "Q7s", "Q6s", "Q5s", "Q4s", "Q3s", "Q2s",
@@ -50,4 +54,8 @@ class Table:
     def update_status(self, event, hand):
         value = self.statistics.get(hand, "Нет данных")
         self.status_label.config(text=f"{hand}: {value}")
+
+    def update_statistics(self):
+        self.statistics = load_statistics()
+        self.status_label.config(text="Данные обновлены!")
 

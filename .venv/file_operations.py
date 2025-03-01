@@ -4,6 +4,7 @@ import re
 import time
 from сardConverter import convert_card_format
 from collections import Counter
+from table import Table
 import threading
 
 lock = threading.Lock()
@@ -47,7 +48,7 @@ def load_folder(text_widget):
         text_widget.config(state="disabled")
 
 
-def parse_file(text_widget):
+def parse_file(text_widget, table):
     user_name = get_user_name()
     if not user_name:
         return
@@ -67,12 +68,12 @@ def parse_file(text_widget):
 
         elapsed_time = time.time() - start_time
         text_widget_update(text_widget, f"Обработка завершена за {elapsed_time:.2f} секунд.\n")
+        table.update_statistics()
     except Exception as e:
         text_widget_update(text_widget, f"Ошибка при обработке файла: {e}\n")
 
 
-
-def parse_folder(text_widget):
+def parse_folder(text_widget, table):
     user_name = get_user_name()
     if not user_name:
         return
@@ -122,6 +123,7 @@ def parse_folder(text_widget):
     elapsed_time = time.time() - start_time
     text_widget_update(text_widget, f"Обработка всех файлов завершена за {elapsed_time:.2f} секунд.\n")
 
+    table.update_statistics()
 
 def extract_card_data(file_path, user_name):
     pattern = fr'<cards[^>]*\bplayer="{user_name}"[^>]*>(.*?)</cards>'

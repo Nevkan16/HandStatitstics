@@ -14,14 +14,14 @@ def create_window():
     text_widget = tk.Text(root, height=5, state=tk.DISABLED)
     text_widget.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-    Table(root, statistics)
+    table = Table(root, statistics)
 
     menu_bar = tk.Menu(root)
     file_menu = tk.Menu(menu_bar, tearoff=0)
     file_menu.add_command(label="Загрузить файл", command=lambda: load_file(text_widget))
     file_menu.add_command(label="Загрузить папку", command=lambda: load_folder(text_widget))
-    file_menu.add_command(label="Обработать файл", command=lambda: parse_file(text_widget))
-    file_menu.add_command(label="Обработать папку", command=lambda: parse_folder(text_widget))
+    file_menu.add_command(label="Обработать файл", command=lambda: parse_file(text_widget, table))
+    file_menu.add_command(label="Обработать папку", command=lambda: parse_folder(text_widget, table))
 
     file_menu.add_separator()
     file_menu.add_command(label="Выход", command=root.quit)
