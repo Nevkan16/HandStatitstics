@@ -43,7 +43,7 @@ def parse_file(text_widget, table):
 
         elapsed_time = time.time() - start_time
         text_widget_update(text_widget, f"Обработка завершена за {elapsed_time:.2f} секунд.\n")
-        table.update_statistics()
+        table.update_statistics(text_widget)
     except Exception as e:
         text_widget_update(text_widget, f"Ошибка при обработке файла: {e}\n")
 
