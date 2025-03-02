@@ -1,21 +1,20 @@
 import tkinter as tk
 
-
 def load_statistics():
     statistics = {}
-    total_sum = 0  # Переменная для хранения суммы значений
+    total_sum = 0
 
     try:
         with open("statistics.txt", "r") as file:
             for line in file:
                 hand, value = line.split()
-                value = int(value)  # Преобразуем в число
+                value = int(value)
                 statistics[hand] = value
-                total_sum += value  # Добавляем значение в сумму
+                total_sum += value
     except FileNotFoundError:
         print("Файл statistics.txt не найден.")
 
-    return statistics, total_sum  # Возвращаем словарь и сумму
+    return statistics, total_sum
 
 
 class Table:
@@ -25,7 +24,7 @@ class Table:
         self.frame.place(x=20, y=110)
         self.cells = []
         self.statistics = statistics
-        self.total_sum = total_sum  # Сохраняем сумму
+        self.total_sum = total_sum
 
         self.status_label = tk.Label(
             root,
@@ -35,7 +34,7 @@ class Table:
             relief="solid",
             borderwidth=2,
         )
-        self.status_label.pack(pady=0, padx=0)  # Рамка будет адаптироваться
+        self.status_label.pack(pady=0, padx=0)
         self.status_label.place(x=30, y=520, width=300, height=30)
 
         self.total_label = tk.Label(
@@ -46,10 +45,37 @@ class Table:
             fg="black",
             relief="solid",
             borderwidth=2,
-            )
+        )
         self.total_label.place(x=420, y=520, height=30)
 
         self.create_table()
+
+    def calculate_expected_count_and_diff(self, hand, value):
+        if hand.endswith("s"):
+            expected_count = self.total_sum / 331.5
+        elif hand.endswith("o"):
+            expected_count = self.total_sum / 110.5
+        else:
+            expected_count = self.total_sum / 221
+
+        diff_percentage = 0
+        if expected_count > 0:
+            diff_percentage = (value - expected_count) / expected_count * 100
+        return expected_count, diff_percentage
+
+    def determine_text_color(self, diff_percentage):
+        if abs(diff_percentage) <= 2:
+            return "black"
+        elif 2 < abs(diff_percentage) <= 5:
+            if diff_percentage > 0:
+                return "#ee7fee"
+            else:
+                return "#7abf51"
+        elif abs(diff_percentage) > 5:
+            if diff_percentage > 0:
+                return "#de5151"
+            else:
+                return "#166f16"
 
     def create_table(self):
         hands = ["AA", "AKs", "AQs", "AJs", "ATs", "A9s", "A8s", "A7s", "A6s", "A5s", "A4s", "A3s", "A2s",
@@ -72,19 +98,32 @@ class Table:
                 hand = hands[i * 13 + j]
 
                 if hand.endswith("s"):
-                    bg_color = "#fff8cd"
+                    bg_color = "#fff7cb"
                 elif hand.endswith("o"):
-                    bg_color = "#ffd6cd"
+                    bg_color = "#f9e1de"
                 else:
-                    bg_color = "#b5e8fe"
+                    bg_color = "#d2ebfa"
 
-                label = tk.Label(self.frame, text=hand, borderwidth=1,
-                                 font=("Arial", 14),
-                                 padx=3,
-                                 pady=3,
-                                 relief="solid", width=3, height=1,
-                                 bg=bg_color
-                                 )
+                value = self.statistics.get(hand, 0)
+
+                expected_count, diff_percentage = self.calculate_expected_count_and_diff(hand, value)
+
+                text_color = self.determine_text_color(diff_percentage)
+
+                label = tk.Label(
+                    self.frame,
+                    text=hand,
+                    borderwidth=1,
+                    font=("Arial", 14),
+                    padx=3,
+                    pady=3,
+                    relief="solid",
+                    width=3,
+                    height=1,
+                    bg=bg_color,
+                    fg=text_color
+                )
+
                 label.grid(row=i, column=j)
                 row.append(label)
 
@@ -93,15 +132,10 @@ class Table:
             self.cells.append(row)
 
     def update_status(self, event, hand):
-        value = self.statistics.get(hand, 0)  # Берем значение или 0, если данных нет
-        percentage = (value / self.total_sum * 100) if self.total_sum > 0 else 0  # Считаем %
+        value = self.statistics.get(hand, 0)
+        expected_count, diff_percentage = self.calculate_expected_count_and_diff(hand, value)
 
-        if hand.endswith("s"):
-            expected_count = self.total_sum / 331.5
-        elif hand.endswith("o"):
-            expected_count = self.total_sum / 110.5
-        else:
-            expected_count = self.total_sum / 221
+        percentage = (value / self.total_sum * 100) if self.total_sum > 0 else 0
 
         self.status_label.config(
             text=f"Hand: {hand} | {percentage:.2f}% | {value} | Exp: {expected_count:.1f}"
