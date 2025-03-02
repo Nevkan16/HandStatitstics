@@ -22,16 +22,32 @@ class Table:
     def __init__(self, root, statistics, total_sum):
         self.root = root
         self.frame = tk.Frame(root)
-        self.frame.pack(pady=10)
+        self.frame.place(x=20, y=110)
         self.cells = []
         self.statistics = statistics
         self.total_sum = total_sum  # Сохраняем сумму
 
-        self.total_label = tk.Label(root, text=f"Hands: {self.total_sum}", width=30, height=2, anchor="e")
-        self.total_label.pack(pady=5, padx=50, side="right")
+        self.status_label = tk.Label(
+            root,
+            font=("Arial", 12),
+            bg="lightgray",
+            fg="black",
+            relief="solid",
+            borderwidth=2,
+        )
+        self.status_label.pack(pady=0, padx=0)  # Рамка будет адаптироваться
+        self.status_label.place(x=30, y=520, width=300, height=30)
 
-        self.status_label = tk.Label(root, text="Наведите курсор на ячейку", width=40, height=2)
-        self.status_label.pack(pady=10)
+        self.total_label = tk.Label(
+            root,
+            text=f"Hands: {self.total_sum}",
+            font=("Arial", 12),
+            bg="lightgray",
+            fg="black",
+            relief="solid",
+            borderwidth=2,
+            )
+        self.total_label.place(x=420, y=520, height=30)
 
         self.create_table()
 
@@ -54,7 +70,21 @@ class Table:
             row = []
             for j in range(13):
                 hand = hands[i * 13 + j]
-                label = tk.Label(self.frame, text=hand, borderwidth=1, relief="solid", width=5, height=2)
+
+                if hand.endswith("s"):
+                    bg_color = "#fff8cd"
+                elif hand.endswith("o"):
+                    bg_color = "#ffd6cd"
+                else:
+                    bg_color = "#b5e8fe"
+
+                label = tk.Label(self.frame, text=hand, borderwidth=1,
+                                 font=("Arial", 14),
+                                 padx=3,
+                                 pady=3,
+                                 relief="solid", width=3, height=1,
+                                 bg=bg_color
+                                 )
                 label.grid(row=i, column=j)
                 row.append(label)
 
@@ -74,7 +104,7 @@ class Table:
             expected_count = self.total_sum / 221
 
         self.status_label.config(
-            text=f"Hand: {hand} | : {percentage:.2f}% | : {value} |  Exp: {expected_count:.1f}"
+            text=f"Hand: {hand} | {percentage:.2f}% | {value} | Exp: {expected_count:.1f}"
         )
 
     def update_statistics(self):

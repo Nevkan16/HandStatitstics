@@ -8,11 +8,11 @@ import os
 def create_window():
     root = tk.Tk()
     root.title("Окно с меню")
-    root.geometry("600x625")
+    root.geometry("568x580")
     statistics, total_sum = load_statistics()
 
     text_widget = tk.Text(root, height=5, state=tk.DISABLED)
-    text_widget.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+    text_widget.place(x=20, y=10, width=530, height=80)
 
     table = Table(root, statistics, total_sum)
 
