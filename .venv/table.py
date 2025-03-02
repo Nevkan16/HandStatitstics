@@ -150,6 +150,17 @@ class Table:
         self.total_label.config(text=f"Hands: {self.total_sum}")
         self.status_label.config(text="Данные обновлены!")
 
+        for i, row in enumerate(self.cells):
+            for j, label in enumerate(row):
+                hand = label.cget("text")
+
+                value = self.statistics.get(hand, 0)
+                expected_count, diff_percentage = self.calculate_expected_count_and_diff(hand, value)
+
+                text_color = self.determine_text_color(diff_percentage)
+
+                label.config(fg=text_color)
+
     def create_legend(self):
         legend_button = tk.Label(self.root, text="🐦", font=("Arial", 20), fg="blue", cursor="hand2")
         legend_button.place(x=360, y=518)
