@@ -23,31 +23,6 @@ def get_user_name():
         return user_name
     return None
 
-
-def load_file(text_widget):
-    user_name = get_user_name()
-    if not user_name:
-        return
-    file_path = filedialog.askopenfilename()
-    if file_path:
-        text_widget.config(state="normal")
-        text_widget.delete(1.0, "end")
-        text_widget.insert("end", f"Пользователь: {user_name}\nВы выбрали файл:\n{file_path}")
-        text_widget.config(state="disabled")
-
-
-def load_folder(text_widget):
-    user_name = get_user_name()
-    if not user_name:
-        return
-    folder_path = filedialog.askdirectory()
-    if folder_path:
-        text_widget.config(state="normal")
-        text_widget.delete(1.0, "end")
-        text_widget.insert("end", f"Пользователь: {user_name}\nВы выбрали папку:\n{folder_path}")
-        text_widget.config(state="disabled")
-
-
 def parse_file(text_widget, table):
     user_name = get_user_name()
     if not user_name:
@@ -123,7 +98,7 @@ def parse_folder(text_widget, table):
     elapsed_time = time.time() - start_time
     text_widget_update(text_widget, f"Обработка всех файлов завершена за {elapsed_time:.2f} секунд.\n")
 
-    table.update_statistics()
+    table.update_statistics(text_widget)
 
 def extract_card_data(file_path, user_name):
     pattern = fr'<cards[^>]*\bplayer="{user_name}"[^>]*>(.*?)</cards>'

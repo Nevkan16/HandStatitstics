@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import Toplevel
 
-def load_statistics():
+def load_statistics(text_widget):
     statistics = {}
     total_sum = 0
 
@@ -13,7 +13,9 @@ def load_statistics():
                 statistics[hand] = value
                 total_sum += value
     except FileNotFoundError:
-        print("Файл statistics.txt не найден.")
+        text_widget.config(state=tk.NORMAL)  # Включаем редактирование
+        text_widget.insert(tk.END, "Файл statistics.txt не найден.\n")
+        text_widget.config(state=tk.DISABLED)
 
     return statistics, total_sum
 
@@ -143,8 +145,8 @@ class Table:
             text=f"Hand: {hand} | {percentage:.2f}% | {value} | Exp: {expected_count:.1f}"
         )
 
-    def update_statistics(self):
-        self.statistics, self.total_sum = load_statistics()
+    def update_statistics(self, text_widget):
+        self.statistics, self.total_sum = load_statistics(text_widget)
         self.total_label.config(text=f"Hands: {self.total_sum}")
         self.status_label.config(text="Данные обновлены!")
 
