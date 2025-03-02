@@ -9,6 +9,7 @@ import threading
 
 lock = threading.Lock()
 global_card_counter = Counter()
+last_selected_folder = None
 
 def get_user_name():
     if os.path.exists('user.txt'):
@@ -49,13 +50,19 @@ def parse_file(text_widget, table):
 
 
 def parse_folder(text_widget, table):
+    global last_selected_folder
+
     user_name = get_user_name()
     if not user_name:
         return
 
-    folder_path = filedialog.askdirectory()
+    initial_dir = os.path.dirname(last_selected_folder) if last_selected_folder else None
+    folder_path = filedialog.askdirectory(initialdir=initial_dir)
+
     if not folder_path:
         return
+
+    last_selected_folder = folder_path
 
     text_widget_update(text_widget, "Начинается обработка файлов в папке...\n")
     clear_statistics()
