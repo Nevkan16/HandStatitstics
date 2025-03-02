@@ -7,8 +7,9 @@ import os
 
 def create_window():
     root = tk.Tk()
-    root.title("Окно с меню")
+    root.title("Обработчик рук")
     root.geometry("568x580")
+    root.resizable(False, False)
 
     text_widget = tk.Text(root, height=5, state=tk.DISABLED)
     text_widget.place(x=20, y=10, width=530, height=80)
