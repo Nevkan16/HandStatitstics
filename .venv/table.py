@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import Toplevel
 
 def load_statistics():
     statistics = {}
@@ -49,6 +50,7 @@ class Table:
         self.total_label.place(x=420, y=520, height=30)
 
         self.create_table()
+        self.create_legend()
 
     def calculate_expected_count_and_diff(self, hand, value):
         if hand.endswith("s"):
@@ -145,3 +147,39 @@ class Table:
         self.statistics, self.total_sum = load_statistics()
         self.total_label.config(text=f"Hands: {self.total_sum}")
         self.status_label.config(text="Данные обновлены!")
+
+    def create_legend(self):
+        legend_button = tk.Label(self.root, text="🐦", font=("Arial", 20), fg="blue", cursor="hand2")
+        legend_button.place(x=360, y=518)
+
+        legend_button.bind("<Enter>", self.show_tooltip)
+        legend_button.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event):
+        tooltip = Toplevel(self.root)
+        tooltip.wm_overrideredirect(True)
+        tooltip.geometry(f"+{event.x_root + 20}+{event.y_root + 20}")
+
+        # Создаем метки с разными цветами, выравнивание по левому краю
+        label_black = tk.Label(tooltip, text="0-2%: Норма", font=("Arial", 10), fg="black", anchor="w", padx=10)
+        label_black.pack(fill="x")
+
+        label_pink = tk.Label(tooltip, text="2-5%: Превышено", font=("Arial", 10), fg="#ee7fee", anchor="w", padx=10)
+        label_pink.pack(fill="x")
+
+        label_green = tk.Label(tooltip, text="2-5%: Занижено", font=("Arial", 10), fg="#7abf51", anchor="w", padx=10)
+        label_green.pack(fill="x")
+
+        label_red = tk.Label(tooltip, text=">5%: Сильно превышено", font=("Arial", 10), fg="#de5151", anchor="w",
+                             padx=10)
+        label_red.pack(fill="x")
+
+        label_darkgreen = tk.Label(tooltip, text="<5%: Сильно занижено", font=("Arial", 10), fg="#166f16", anchor="w",
+                                   padx=10)
+        label_darkgreen.pack(fill="x")
+
+    def hide_tooltip(self, event):
+
+        for widget in self.root.winfo_children():
+            if isinstance(widget, Toplevel):
+                widget.destroy()
