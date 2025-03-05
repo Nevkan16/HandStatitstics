@@ -3,10 +3,10 @@ from tkinter import filedialog, simpledialog, Text
 import re
 import time
 from сardConverter import convert_card_format
+from menu_operations import get_user_name, set_user_name
 from collections import Counter
 from table import Table
 import threading
-
 
 class Operations:
     def __init__(self):
@@ -15,26 +15,17 @@ class Operations:
         self.last_selected_folder = None
         self.user_name = None
 
-    def get_user_name(self):
-        if os.path.exists('user.txt'):
-            with open('user.txt', 'r') as file:
-                user_name = file.read().strip()
-                if user_name:
-                    return user_name
-        user_name = simpledialog.askstring("Имя пользователя", "Введите ваше имя:")
-        if user_name:
-            with open('user.txt', 'w') as file:
-                file.write(user_name)
-            return user_name
-        return None
+    def ensure_user_name(self, update_callback=None):
+        self.user_name = get_user_name()
 
-    def ensure_user_name(self):
         if not self.user_name:
-            self.user_name = self.get_user_name()
-            return bool(self.user_name)
+            set_user_name(update_callback)
+            self.user_name = get_user_name()
+
+        return bool(self.user_name)
 
     def process_pars_file(self, text_widget, table, clear_stats=True):
-        if not self.ensure_user_name():
+        if not self.ensure_user_name(table.update_user_name):
             return
 
         file_path = filedialog.askopenfilename()
@@ -64,7 +55,7 @@ class Operations:
         self.process_pars_file(text_widget, table, clear_stats=False)
 
     def process_folder(self, text_widget, table, clear_stats=True):
-        if not self.ensure_user_name():
+        if not self.ensure_user_name(table.update_user_name):
             return
 
         initial_dir = os.path.dirname(self.last_selected_folder) if self.last_selected_folder else None

@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import Toplevel
+from menu_operations import get_user_name
 
 def load_statistics(text_widget):
     statistics = {}
@@ -18,7 +19,6 @@ def load_statistics(text_widget):
         text_widget.config(state=tk.DISABLED)
 
     return statistics, total_sum
-
 
 class Table:
     def __init__(self, root, statistics, total_sum):
@@ -51,8 +51,20 @@ class Table:
         )
         self.total_label.place(x=420, y=520, height=30)
 
+        self.user_name = get_user_name()
+        self.user_label = tk.Label(
+            root,
+            text=f"{self.user_name}",
+            font=("Arial", 11)
+        )
+        self.user_label.place(relx=1.0, rely=1.0, anchor="se", x=0, y=0, height=30)
+
         self.create_table()
         self.create_legend()
+
+    def update_user_name(self):
+        self.user_name = get_user_name()
+        self.user_label.config(text=f"{self.user_name}")
 
     def calculate_expected_count_and_diff(self, hand, value):
         if hand.endswith("s"):

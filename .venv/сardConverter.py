@@ -21,6 +21,5 @@ def convert_card_format(card_text):
         print(f"Ошибка при обработке строки '{card_text}': {e}")
         return None
 
-
 def get_rank_value(rank):
     return "AKQJT98765432".index(rank)
