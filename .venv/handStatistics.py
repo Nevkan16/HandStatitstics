@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import simpledialog, messagebox
 from table import Table, load_statistics
 from file_operations import Operations
 from menu_operations import get_user_name, set_user_name, delete_user_name
@@ -36,9 +36,17 @@ def create_window():
     menu_bar.add_cascade(label="Файл", menu=file_menu)
     menu_bar.add_cascade(label="Пользователь", menu=user_menu)
 
+    about_menu = tk.Menu(menu_bar, tearoff=0)
+    about_menu.add_command(label="О программе", command=show_about)
+    menu_bar.add_cascade(label="О программе", menu=about_menu)
+
     root.config(menu=menu_bar)
 
     root.mainloop()
+
+def show_about():
+    about_message = "Версия: 1.0\nРазработано: Nevkan16"
+    messagebox.showinfo("О программе", about_message)
 
 if __name__ == "__main__":
     create_window()
