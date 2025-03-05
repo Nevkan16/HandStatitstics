@@ -13,7 +13,7 @@ class Operations:
         self.lock = threading.Lock()
         self.global_card_counter = Counter()
         self.last_selected_folder = None
-        self.user_name = self.get_user_name()
+        self.user_name = None
 
     def get_user_name(self):
         if os.path.exists('user.txt'):
@@ -28,8 +28,13 @@ class Operations:
             return user_name
         return None
 
-    def process_pars_file(self, text_widget, table, clear_stats=True):
+    def ensure_user_name(self):
         if not self.user_name:
+            self.user_name = self.get_user_name()
+            return bool(self.user_name)
+
+    def process_pars_file(self, text_widget, table, clear_stats=True):
+        if not self.ensure_user_name():
             return
 
         file_path = filedialog.askopenfilename()
@@ -59,7 +64,7 @@ class Operations:
         self.process_pars_file(text_widget, table, clear_stats=False)
 
     def process_folder(self, text_widget, table, clear_stats=True):
-        if not self.user_name:
+        if not self.ensure_user_name():
             return
 
         initial_dir = os.path.dirname(self.last_selected_folder) if self.last_selected_folder else None
