@@ -1,5 +1,5 @@
 import os
-from tkinter import filedialog, simpledialog, Tk, Text
+from tkinter import filedialog, simpledialog, Text
 import re
 import time
 from сardConverter import convert_card_format
@@ -7,156 +7,163 @@ from collections import Counter
 from table import Table
 import threading
 
-lock = threading.Lock()
-global_card_counter = Counter()
-last_selected_folder = None
 
-def get_user_name():
-    if os.path.exists('user.txt'):
-        with open('user.txt', 'r') as file:
-            user_name = file.read().strip()
-            if user_name:
-                return user_name
-    user_name = simpledialog.askstring("Имя пользователя", "Введите ваше имя:")
-    if user_name:
-        with open('user.txt', 'w') as file:
-            file.write(user_name)
-        return user_name
-    return None
+class Operations:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.global_card_counter = Counter()
+        self.last_selected_folder = None
+        self.user_name = self.get_user_name()
 
-def parse_file(text_widget, table):
-    user_name = get_user_name()
-    if not user_name:
-        return
+    def get_user_name(self):
+        if os.path.exists('user.txt'):
+            with open('user.txt', 'r') as file:
+                user_name = file.read().strip()
+                if user_name:
+                    return user_name
+        user_name = simpledialog.askstring("Имя пользователя", "Введите ваше имя:")
+        if user_name:
+            with open('user.txt', 'w') as file:
+                file.write(user_name)
+            return user_name
+        return None
 
-    file_path = filedialog.askopenfilename()
-    if not file_path:
-        return
+    def process_pars_file(self, text_widget, table, clear_stats=True):
+        if not self.user_name:
+            return
 
-    text_widget_update(text_widget, "Начинается обработка файла...\n")
-    clear_statistics()
+        file_path = filedialog.askopenfilename()
+        if not file_path:
+            return
 
-    start_time = time.time()
+        self.text_widget_update(text_widget, "Начинается обработка файла...\n")
+        if clear_stats:
+            self.clear_statistics()
 
-    try:
-        matches = extract_card_data(file_path, user_name)
-        save_converted_data(matches)
+        start_time = time.time()
 
+        try:
+            matches = self.extract_card_data(file_path)
+            self.save_converted_data(matches)
+
+            elapsed_time = time.time() - start_time
+            self.text_widget_update(text_widget, f"Обработка завершена за {elapsed_time:.2f} секунд.\n")
+            table.update_statistics(text_widget)
+        except Exception as e:
+            self.text_widget_update(text_widget, f"Ошибка при обработке файла: {e}\n")
+
+    def parse_file(self, text_widget, table):
+        self.process_pars_file(text_widget, table, clear_stats=True)
+
+    def add_parse_file(self, text_widget, table):
+        self.process_pars_file(text_widget, table, clear_stats=False)
+
+    def process_folder(self, text_widget, table, clear_stats=True):
+        if not self.user_name:
+            return
+
+        initial_dir = os.path.dirname(self.last_selected_folder) if self.last_selected_folder else None
+        folder_path = filedialog.askdirectory(initialdir=initial_dir)
+
+        if not folder_path:
+            return
+
+        self.last_selected_folder = folder_path
+
+        self.text_widget_update(text_widget, "Начинается обработка файлов в папке...\n")
+
+        if clear_stats:
+            self.clear_statistics()
+
+        self.global_card_counter.clear()
+        files_to_process = self.get_files_to_process(folder_path)
+
+        start_time = time.time()
+        self.process_files_in_threads(files_to_process, text_widget)
+
+        self.save_converted_data(self.global_card_counter)
         elapsed_time = time.time() - start_time
-        text_widget_update(text_widget, f"Обработка завершена за {elapsed_time:.2f} секунд.\n")
+        self.text_widget_update(text_widget, f"Обработка всех файлов завершена за {elapsed_time:.2f} секунд.\n")
+
         table.update_statistics(text_widget)
-    except Exception as e:
-        text_widget_update(text_widget, f"Ошибка при обработке файла: {e}\n")
 
+    def parse_folder(self, text_widget, table):
+        self.process_folder(text_widget, table, clear_stats=True)
 
-def parse_folder(text_widget, table):
-    global last_selected_folder
+    def add_parse_folder(self, text_widget, table):
+        self.process_folder(text_widget, table, clear_stats=False)
 
-    user_name = get_user_name()
-    if not user_name:
-        return
+    def get_files_to_process(self, folder_path):
+        files_to_process = []
+        for root, _, files in os.walk(folder_path):
+            for file in files:
+                if file.endswith('.xml'):
+                    files_to_process.append(os.path.join(root, file))
+        return files_to_process
 
-    initial_dir = os.path.dirname(last_selected_folder) if last_selected_folder else None
-    folder_path = filedialog.askdirectory(initialdir=initial_dir)
+    def process_files_in_threads(self, files_to_process, text_widget):
+        threads = []
+        for file_path in files_to_process:
+            thread = threading.Thread(target=self.process_file, args=(file_path, text_widget))
+            threads.append(thread)
+            thread.start()
 
-    if not folder_path:
-        return
+        for thread in threads:
+            thread.join()
 
-    last_selected_folder = folder_path
+    def process_file(self, file_path, text_widget):
+        try:
+            matches = self.extract_card_data(file_path)
+            local_counter = Counter()
 
-    text_widget_update(text_widget, "Начинается обработка файлов в папке...\n")
-    clear_statistics()
+            for match in matches:
+                converted_match = convert_card_format(match.strip())
+                if converted_match:
+                    local_counter[converted_match] += 1
 
-    global global_card_counter
-    global_card_counter.clear()
+            with self.lock:
+                self.global_card_counter.update(local_counter)
 
-    files_to_process = get_files_to_process(folder_path)
+        except Exception as e:
+            self.text_widget_update(text_widget, f"Ошибка при обработке файла {file_path}: {e}\n")
 
-    start_time = time.time()
-    process_files_in_threads(files_to_process, user_name, text_widget)
+    def extract_card_data(self, file_path):
+        pattern = fr'<cards[^>]*\bplayer="{self.user_name}"[^>]*>(.*?)</cards>'
 
-    save_converted_data(global_card_counter)
-    elapsed_time = time.time() - start_time
-    text_widget_update(text_widget, f"Обработка всех файлов завершена за {elapsed_time:.2f} секунд.\n")
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
 
-    table.update_statistics(text_widget)
+        return re.findall(pattern, content)
 
+    def save_converted_data(self, data):
+        card_counter = Counter()
 
-def get_files_to_process(folder_path):
-    files_to_process = []
-    for root, _, files in os.walk(folder_path):
-        for file in files:
-            if file.endswith('.xml'):
-                files_to_process.append(os.path.join(root, file))
-    return files_to_process
+        if isinstance(data, list):
+            for match in data:
+                converted_match = convert_card_format(match.strip())
+                if converted_match:
+                    card_counter[converted_match] += 1
+        elif isinstance(data, Counter):
+            card_counter = data
 
+        if card_counter:
+            with open("statistics.txt", "a", encoding="utf-8") as stat_file:
+                for card, count in card_counter.items():
+                    stat_file.write(f"{card} {count}\n")
 
-def process_files_in_threads(files_to_process, user_name, text_widget):
-    threads = []
-    for file_path in files_to_process:
-        thread = threading.Thread(target=process_file, args=(file_path, user_name, text_widget))
-        threads.append(thread)
-        thread.start()
+    def text_widget_update(self, text_widget, message):
+        text_widget.config(state="normal")
+        text_widget.delete(1.0, "end")
+        text_widget.insert("end", message)
+        text_widget.config(state="disabled")
+        text_widget.update_idletasks()
 
-    for thread in threads:
-        thread.join()
+    def clear_statistics(self):
+        if os.path.exists("statistics.txt"):
+            with open("statistics.txt", "w", encoding="utf-8") as file:
+                file.truncate(0)
 
-
-def process_file(file_path, user_name, text_widget):
-    try:
-        matches = extract_card_data(file_path, user_name)
-        local_counter = Counter()
-
-        for match in matches:
-            converted_match = convert_card_format(match.strip())
-            if converted_match:
-                local_counter[converted_match] += 1
-
-        with lock:
-            global global_card_counter
-            global_card_counter.update(local_counter)
-
-    except Exception as e:
-        text_widget_update(text_widget, f"Ошибка при обработке файла {file_path}: {e}\n")
-
-
-def extract_card_data(file_path, user_name):
-    pattern = fr'<cards[^>]*\bplayer="{user_name}"[^>]*>(.*?)</cards>'
-
-    with open(file_path, 'r', encoding='utf-8') as file:
-        content = file.read()
-
-    return re.findall(pattern, content)
-
-
-def save_converted_data(data):
-    card_counter = Counter()
-
-    if isinstance(data, list):
-        for match in data:
-            converted_match = convert_card_format(match.strip())
-            if converted_match:
-                card_counter[converted_match] += 1
-    elif isinstance(data, Counter):
-        card_counter = data
-
-    if card_counter:
-        with open("statistics.txt", "a", encoding="utf-8") as stat_file:
-            for card, count in card_counter.items():
-                stat_file.write(f"{card} {count}\n")
-
-
-def text_widget_update(text_widget, message):
-    text_widget.config(state="normal")
-    text_widget.delete(1.0, "end")
-    text_widget.insert("end", message)
-    text_widget.config(state="disabled")
-    text_widget.update_idletasks()
-
-
-def clear_statistics():
-    if os.path.exists("statistics.txt"):
-        with open("statistics.txt", "w", encoding="utf-8") as file:
-            file.truncate(0)
-
-
+    def clear(self, text_widget, table):
+        self.clear_statistics()
+        table.update_statistics(text_widget)
+        self.text_widget_update(text_widget, "Статистика очищена\n")
