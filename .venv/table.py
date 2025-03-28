@@ -160,7 +160,6 @@ class Table:
     def update_statistics(self, text_widget):
         self.statistics, self.total_sum = load_statistics(text_widget)
         self.total_label.config(text=f"Hands: {self.total_sum}")
-        self.status_label.config(text="Данные обновлены!")
 
         for i, row in enumerate(self.cells):
             for j, label in enumerate(row):

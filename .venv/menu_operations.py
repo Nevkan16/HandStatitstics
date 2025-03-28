@@ -19,7 +19,7 @@ def get_user_name():
 def set_user_name(update_callback=None):
     global USER_DELETED
     USER_DELETED = False
-    user_name = simpledialog.askstring("Ввод", "Введите имя игрока:")
+    user_name = simpledialog.askstring("😊", "Введите имя игрока:")
     if user_name:
         with open('user.txt', 'w') as file:
             file.write(user_name)
