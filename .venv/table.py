@@ -15,7 +15,7 @@ def load_statistics(text_widget):
                 total_sum += value
     except FileNotFoundError:
         text_widget.config(state=tk.NORMAL)  # Включаем редактирование
-        text_widget.insert(tk.END, "Файл statistics.txt не найден.\n")
+        text_widget.insert(tk.END, "Здравствуйте! Приятного пользования! :-)\n")
         text_widget.config(state=tk.DISABLED)
 
     return statistics, total_sum

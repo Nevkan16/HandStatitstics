@@ -4,7 +4,7 @@ from tkinter import ttk
 from table import Table, load_statistics
 from file_operations import Operations
 from menu_operations import get_user_name, set_user_name, delete_user_name
-import os
+from hotkeys import bind_hotkeys
 
 def create_window():
     root = tk.Tk()
@@ -24,12 +24,11 @@ def create_window():
 
     menu_bar = tk.Menu(root)
     file_menu = tk.Menu(menu_bar, tearoff=0)
-    file_menu.add_command(label="Обработать файл", command=lambda: operations.parse_file(text_widget, table))
-    file_menu.add_command(label="Добавить файл", command=lambda: operations.add_parse_file(text_widget, table))
-    file_menu.add_command(label="Обработать папку", command=lambda: operations.parse_folder(text_widget, table))
-    file_menu.add_command(label="Добавить папку", command=lambda: operations.add_parse_folder(text_widget, table))
-    file_menu.add_command(label="Очистить статистику", command=lambda: operations.clear(text_widget, table))
-
+    file_menu.add_command(label="Обработать файл (Ctrl+1)", command=lambda: operations.parse_file(text_widget, table))
+    file_menu.add_command(label="Добавить файл (Ctrl+2)", command=lambda: operations.add_parse_file(text_widget, table))
+    file_menu.add_command(label="Обработать папку (Ctrl+3)", command=lambda: operations.parse_folder(text_widget, table))
+    file_menu.add_command(label="Добавить папку (Ctrl+4)", command=lambda: operations.add_parse_folder(text_widget, table))
+    file_menu.add_command(label="Очистить статистику (Del)", command=lambda: operations.clear(text_widget, table))
     file_menu.add_separator()
     file_menu.add_command(label="Выход", command=root.quit)
 
@@ -42,14 +41,16 @@ def create_window():
 
     about_menu = tk.Menu(menu_bar, tearoff=0)
     about_menu.add_command(label="О программе", command=show_about)
-    menu_bar.add_cascade(label="О программе", menu=about_menu)
+    menu_bar.add_cascade(label="Инфо", menu=about_menu)
 
     root.config(menu=menu_bar)
+
+    bind_hotkeys(root, operations, text_widget, table)
 
     root.mainloop()
 
 def show_about():
-    about_message = "Версия: 1.1\nРазработано: Nevkan16"
+    about_message = "Версия: 1.2\nРазработано: Nevkan16"
     messagebox.showinfo("О программе", about_message)
 
 if __name__ == "__main__":

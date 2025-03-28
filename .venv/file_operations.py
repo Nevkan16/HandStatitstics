@@ -1,5 +1,5 @@
 import os
-from tkinter import filedialog, simpledialog, Text
+from tkinter import filedialog, simpledialog, Text, messagebox
 import re
 import time
 from сardConverter import convert_card_format
@@ -188,6 +188,8 @@ class Operations:
                 file.truncate(0)
 
     def clear(self, text_widget, table):
-        self.clear_statistics()
-        table.update_statistics(text_widget)
-        self.text_widget_update(text_widget, "Статистика очищена\n")
+        confirm = messagebox.askyesno("Подтверждение", "Вы уверены, что хотите очистить статистику?")
+        if confirm:
+            self.clear_statistics()
+            table.update_statistics(text_widget)
+            self.text_widget_update(text_widget, "Статистика очищена\n")
