@@ -49,7 +49,7 @@ def create_window():
     root.mainloop()
 
 def show_about():
-    about_message = "Версия: 1.0\nРазработано: Nevkan16"
+    about_message = "Версия: 1.1\nРазработано: Nevkan16"
     messagebox.showinfo("О программе", about_message)
 
 if __name__ == "__main__":
