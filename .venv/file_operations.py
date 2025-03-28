@@ -9,11 +9,12 @@ from table import Table
 import threading
 
 class Operations:
-    def __init__(self):
+    def __init__(self, progress=None):
         self.lock = threading.Lock()
         self.global_card_counter = Counter()
         self.last_selected_folder = None
         self.user_name = None
+        self.progress = progress
 
     def ensure_user_name(self, update_callback=None):
         self.user_name = get_user_name()
@@ -39,14 +40,27 @@ class Operations:
         start_time = time.time()
 
         try:
+            if self.progress:
+                self.progress["value"] = 0
+                self.progress.update()
+
             matches = self.extract_card_data(file_path)
             self.save_converted_data(matches)
+
+            if self.progress:
+                self.progress["value"] = 100
+                self.progress.update()
 
             elapsed_time = time.time() - start_time
             self.text_widget_update(text_widget, f"Обработка завершена за {elapsed_time:.2f} секунд.\n")
             table.update_statistics(text_widget)
         except Exception as e:
             self.text_widget_update(text_widget, f"Ошибка при обработке файла: {e}\n")
+
+        if self.progress:
+            time.sleep(0.5)
+            self.progress["value"] = 0
+            self.progress.update()
 
     def parse_file(self, text_widget, table):
         self.process_pars_file(text_widget, table, clear_stats=True)
@@ -99,13 +113,27 @@ class Operations:
 
     def process_files_in_threads(self, files_to_process, text_widget):
         threads = []
-        for file_path in files_to_process:
+        total_files = len(files_to_process)
+
+        for index, file_path in enumerate(files_to_process):
             thread = threading.Thread(target=self.process_file, args=(file_path, text_widget))
             threads.append(thread)
             thread.start()
 
+            if self.progress:
+                self.progress["value"] = (index + 1) / total_files * 100
+                self.progress.update()
+
         for thread in threads:
             thread.join()
+
+        if self.progress:
+            self.progress["value"] = 100
+            self.progress.update()
+
+            time.sleep(0.5)
+            self.progress["value"] = 0
+            self.progress.update()
 
     def process_file(self, file_path, text_widget):
         try:

@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
+from tkinter import ttk
 from table import Table, load_statistics
 from file_operations import Operations
 from menu_operations import get_user_name, set_user_name, delete_user_name
@@ -12,11 +13,14 @@ def create_window():
     root.resizable(False, False)
 
     text_widget = tk.Text(root, height=5, state=tk.DISABLED)
-    text_widget.place(x=20, y=10, width=530, height=80)
+    text_widget.place(x=20, y=10, width=530, height=60)
     statistics, total_sum = load_statistics(text_widget)
 
+    progress = ttk.Progressbar(root, orient="horizontal", length=530, mode="determinate")
+    progress.place(x=20, y=80, width=530, height=20)
+
     table = Table(root, statistics, total_sum)
-    operations = Operations()
+    operations = Operations(progress)
 
     menu_bar = tk.Menu(root)
     file_menu = tk.Menu(menu_bar, tearoff=0)
