@@ -25,11 +25,11 @@ class Operations:
 
         return bool(self.user_name)
 
-    def process_pars_file(self, text_widget, table, clear_stats=True):
+    def process_pars_file(self, text_widget, table, clear_stats=True, dialog_title="Обработать файл"):
         if not self.ensure_user_name(table.update_user_name):
             return
 
-        file_path = filedialog.askopenfilename()
+        file_path = filedialog.askopenfilename(title=dialog_title)
         if not file_path:
             return
 
@@ -66,14 +66,14 @@ class Operations:
         self.process_pars_file(text_widget, table, clear_stats=True)
 
     def add_parse_file(self, text_widget, table):
-        self.process_pars_file(text_widget, table, clear_stats=False)
+        self.process_pars_file(text_widget, table, clear_stats=False, dialog_title="Добавить файл")
 
-    def process_folder(self, text_widget, table, clear_stats=True):
+    def process_folder(self, text_widget, table, clear_stats=True, dialog_title="Обработать папку"):
         if not self.ensure_user_name(table.update_user_name):
             return
 
         initial_dir = os.path.dirname(self.last_selected_folder) if self.last_selected_folder else None
-        folder_path = filedialog.askdirectory(initialdir=initial_dir)
+        folder_path = filedialog.askdirectory(initialdir=initial_dir, title=dialog_title)
 
         if not folder_path:
             return
@@ -82,6 +82,7 @@ class Operations:
 
         self.text_widget_update(text_widget, "Начинается обработка файлов в папке...\n")
 
+        self.global_card_counter.clear()
         if clear_stats:
             self.clear_statistics()
 
@@ -101,7 +102,7 @@ class Operations:
         self.process_folder(text_widget, table, clear_stats=True)
 
     def add_parse_folder(self, text_widget, table):
-        self.process_folder(text_widget, table, clear_stats=False)
+        self.process_folder(text_widget, table, clear_stats=False, dialog_title="Добавить папку")
 
     def get_files_to_process(self, folder_path):
         files_to_process = []
@@ -170,10 +171,24 @@ class Operations:
         elif isinstance(data, Counter):
             card_counter = data
 
-        if card_counter:
-            with open("statistics.txt", "a", encoding="utf-8") as stat_file:
-                for card, count in card_counter.items():
-                    stat_file.write(f"{card} {count}\n")
+        if not card_counter:
+            return
+
+        existing_counter = Counter()
+        if os.path.exists("statistics.txt"):
+            with open("statistics.txt", "r", encoding="utf-8") as file:
+                for line in file:
+                    try:
+                        hand, value = line.strip().split()
+                        existing_counter[hand] += int(value)
+                    except ValueError:
+                        continue
+
+        existing_counter.update(card_counter)
+
+        with open("statistics.txt", "w", encoding="utf-8") as stat_file:
+            for card, count in existing_counter.items():
+                stat_file.write(f"{card} {count}\n")
 
     def text_widget_update(self, text_widget, message):
         text_widget.config(state="normal")

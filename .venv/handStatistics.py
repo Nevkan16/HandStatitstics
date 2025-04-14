@@ -24,10 +24,10 @@ def create_window():
 
     menu_bar = tk.Menu(root)
     file_menu = tk.Menu(menu_bar, tearoff=0)
-    file_menu.add_command(label="Обработать файл (Ctrl+1)", command=lambda: operations.parse_file(text_widget, table))
-    file_menu.add_command(label="Добавить файл (Ctrl+2)", command=lambda: operations.add_parse_file(text_widget, table))
-    file_menu.add_command(label="Обработать папку (Ctrl+3)", command=lambda: operations.parse_folder(text_widget, table))
-    file_menu.add_command(label="Добавить папку (Ctrl+4)", command=lambda: operations.add_parse_folder(text_widget, table))
+    file_menu.add_command(label="Обработать файл (Alt+1)", command=lambda: operations.parse_file(text_widget, table))
+    file_menu.add_command(label="Добавить файл (Alt+2)", command=lambda: operations.add_parse_file(text_widget, table))
+    file_menu.add_command(label="Обработать папку (Alt+3)", command=lambda: operations.parse_folder(text_widget, table))
+    file_menu.add_command(label="Добавить папку (Alt+4)", command=lambda: operations.add_parse_folder(text_widget, table))
     file_menu.add_command(label="Очистить статистику (Del)", command=lambda: operations.clear(text_widget, table))
     file_menu.add_separator()
     file_menu.add_command(label="Выход", command=root.quit)
@@ -50,7 +50,7 @@ def create_window():
     root.mainloop()
 
 def show_about():
-    about_message = "Версия: 1.2\nРазработано: Nevkan16"
+    about_message = "Версия: 1.3\nРазработано: Nevkan16"
     messagebox.showinfo("О программе", about_message)
 
 if __name__ == "__main__":
